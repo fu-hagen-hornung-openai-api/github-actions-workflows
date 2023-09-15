@@ -1,0 +1,15 @@
+name: terraform-apply
+description: Actions needed to deploy terraform
+inputs:
+  working-directory:
+    description: "The working directory where the terraform files are located"
+    required: true
+    default: "../terraform/"
+  workspace:
+    description: "The terraform workspace to use"
+    required: true
+
+runs:
+  - name: Terraform Apply
+    if: ${{ github.workspace != 'prod' }} || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    run: terraform apply -auto-approve -var-file=./env/${{ github.workspace }}.tfvars
