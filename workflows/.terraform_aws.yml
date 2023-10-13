@@ -1,18 +1,20 @@
 name: Terraform CI
-description: Github Action to execute all other actions in one place
-inputs:
-  working-directory:
-    type: string
-    default: "."
-  TOOGLE_DEV:
-    type: boolean
-    default: false
-  Toogle_qs:
-    type: boolean
-    default: false
-  TOOGLE_PROD:
-    type: boolean
-    default: false
+
+on:
+workflow_call:
+  inputs:
+    working-directory:
+      type: string
+      default: "."
+    TOOGLE_DEV:
+      type: boolean
+      default: false
+    Toogle_qs:
+      type: boolean
+      default: false
+    TOOGLE_PROD:
+      type: boolean
+      default: false
 
 runs:
   jobs:
