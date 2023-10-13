@@ -9,7 +9,7 @@ workflow_call:
     TOOGLE_DEV:
       type: boolean
       default: false
-    Toogle_QA:
+    Toogle_qs:
       type: boolean
       default: false
     TOOGLE_PROD:
@@ -29,62 +29,57 @@ runs:
           with:
             workspace: dev
 
-    - terraform-plan-dev:
+    - terraform-plan-pr:
       runs-on: ubuntu-latest
-      if: github.event == 'pull_request' && (${{ env.TOOGLE_DEV == 'true' }}
+      if: github.event_name == 'pull_request'
       steps:
         - name: plan
+          if: ${{ env.TOOGLE_DEV == true }}
           uses: ./.github/terraform-github-actions/actions/terraform-plan
           with:
             workspace: dev
+        - name: plan
+          if: ${{ env.TOOGLE_QS == true }}
+          uses: ./.github/terraform-github-actions/actions/terraform-plan
+          with:
+            workspace: qs
+        - name: plan
+          if: ${{ env.TOOGLE_PROD == true }}
+          uses: ./.github/terraform-github-actions/actions/terraform-plan
+          with:
+            workspace: prod
 
-    - terraform-apply-dev:
+    - terraform-apply:
+      if: (github.event_name == 'push' && github.ref == 'refs/heads/main')
       runs-on: ubuntu-latest
       steps:
-        - name: apply
-          if: (github.event_name == 'push' && github.ref == 'refs/heads/main') && (${{ env.TOOGLE_DEV == 'true' }})
+        - name: plan-dev
+          if: ${{ env.TOOGLE_DEV == true }}
+          uses: ./.github/terraform-github-actions/actions/terraform-plan
+          with:
+            workspace: dev
+        - name: plan-qs
+          if: ${{ env.TOOGLE_QS == true }}
+          uses: ./.github/terraform-github-actions/actions/terraform-plan
+          with:
+            workspace: qs
+        - name: plan-prod
+          if: ${{ env.TOOGLE_PROD == true }}
+          uses: ./.github/terraform-github-actions/actions/terraform-plan
+          with:
+            workspace: prod
+        - name: apply-dev
+          if: (${{ env.TOOGLE_DEV == true }})
           uses: ./.github/terraform-github-actions/actions/terraform-apply
           with:
             workspace: dev
-
-    - terraform-plan-qa:
-      if: github.event == 'pull_request' && (${{ env.TOOGLE_QS == 'true' }}
-      runs-on: ubuntu-latest
-      steps:
-        - name: plan
-          uses: ./.github/terraform-github-actions/actions/terraform-plan
-          with:
-            workspace: qa
-
-    - terraform-apply-qa:
-      if: github.event == 'pull_request' && (${{ env.TOOGLE_QS == 'true' }}
-      runs-on: ubuntu-latest
-      steps:
-        - name: apply
-          if: ${{ github.workspace != 'qa' }} || (github.event_name == 'push' && github.ref == 'refs/heads/main') && (${{ env.TOOGLE_QA == 'true' }})
+        - name: apply-qs
+          if: (${{ env.TOOGLE_qs == true }})
           uses: ./.github/terraform-github-actions/actions/terraform-apply
           with:
-            workspace: qa
-
-    - terraform-plan-prod:
-      if: github.event == 'pull_request' && ${{ env.TOOGLE_PROD == 'true' }}
-      runs-on: ubuntu-latest
-      steps:
-        - name: plan
-          uses: ./.github/terraform-github-actions/actions/terraform-plan
-          with:
-            workspace: prod
-        - name: apply
-          if: ${{ github.workspace != 'prod' }} || (github.event_name == 'push' && github.ref == 'refs/heads/main') && (${{ env.TOOGLE_PROD == 'true' }})
-          uses: ./.github/terraform-github-actions/actions/terraform-apply
-          with:
-            workspace: prod
-
-    - terraform-plan-prod:
-      if: ${{ github.workspace != 'prod' }} || (github.event_name == 'push' && github.ref == 'refs/heads/main') && (${{ env.TOOGLE_PROD == 'true' }})
-      runs-on: ubuntu-latest
-      steps:
-        - name: apply
+            workspace: qs
+        - name: apply-prod
+          if: (${{ env.TOOGLE_PROD == true }})
           uses: ./.github/terraform-github-actions/actions/terraform-apply
           with:
             workspace: prod
