@@ -7,9 +7,13 @@ inputs:
     default: "../terraform/"
   workspace:
     description: "The terraform workspace to use"
-    required: true
+    required: false
 
 runs:
   - name: Terraform Apply
-    if: ${{ github.workspace != 'prod' }} || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: ${{env.workspace !=false}}
     run: terraform apply -auto-approve -var-file=./env/${{ github.workspace }}.tfvars
+
+  - name: Terraform Apply
+    if: ${{env.workspace ==false}}
+    run: terraform apply -auto-approve

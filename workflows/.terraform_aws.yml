@@ -25,14 +25,20 @@ runs:
         - name: terraform-init
           uses: ./.github/terraform-github-actions/actions/terraform-init
         - name: terraform-validate
+          if: ${{ env.TOOGLE_DEV == true }}
           uses: ./.github/terraform-github-actions/actions/terraform-validate
           with:
             workspace: dev
+        - name: terraform-validate-in-default
+          if: ${{ env.TOOGLE_DEV != true }}
+          uses: ./.github/terraform-github-actions/actions/terraform-validate
 
     - terraform-plan-pr:
       runs-on: ubuntu-latest
       if: github.event_name == 'pull_request'
       steps:
+        - name: login
+          uses: ./.github/terraform-github-actions/actions/terraform-login
         - name: plan
           if: ${{ env.TOOGLE_DEV == true }}
           uses: ./.github/terraform-github-actions/actions/terraform-plan

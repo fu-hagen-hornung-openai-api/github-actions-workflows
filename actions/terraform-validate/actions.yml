@@ -7,19 +7,12 @@ inputs:
     default: "../terraform/"
   workspace:
     description: "The terraform workspace to use"
-    required: true
+    required: false
 
 runs:
   steps:
     - name: Checkout
       uses: actions/checkout@v2
-
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: eu-central-1
 
     - name: Terraform Init
       run: terraform init
@@ -28,4 +21,9 @@ runs:
       run: terraform select-or-create workspace env.workspace
 
     - name: Terraform Validate
+      if: ${{env.workspace !=false}}
+      run: terraform validate -var-file=./env/${{ env.workspace }}.tfvars
+
+    - name: Terraform Validate
+      if: ${{env.workspace ==false}}
       run: terraform validate -var-file=./env/${{ env.workspace }}.tfvars

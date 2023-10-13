@@ -7,9 +7,14 @@ inputs:
     default: "../terraform/"
   workspace:
     description: "The terraform workspace to use"
-    required: true
+    required: false
 
 runs:
   steps:
     - name: Terraform Plan
+      if: ${{env.workspace !=false}}
       run: terraform plan -var-file=./env/${{ github.workspace }}.tfvars
+
+    - name: Terraform Plan Default Workspace
+      if: ${{env.workspace ==false}}
+      run: terraform plan
