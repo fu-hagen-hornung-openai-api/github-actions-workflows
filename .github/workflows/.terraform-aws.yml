@@ -1,0 +1,40 @@
+name: Terraform CI
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        type: string
+        default: "."
+      workspaces:
+        type: string
+        default: '["default"]'
+      
+jobs:
+
+  terraform-pre-plan:
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/terraform-pre-plan.yml
+    with:
+      working-directory: ${{ inputs.working-directory }}
+    secrets: inherit
+
+  terraform-plan:
+    strategy:
+      matrix:
+        workspace: ${{fromJson(inputs.workspaces)}}
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/terraform-plan.yml
+    with:
+      working-directory: ${{ inputs.working-directory }}
+      workspace: ${{ matrix.workspace }}
+    secrets: inherit
+
+  terraform-apply:
+    if: github.event_name == 'push'
+    uses: ./.github/workflows/terraform-apply.yml
+    with:
+      working-directory: ${{ inputs.working-directory }}
+      workspace: prod
+    secrets: inherit
+

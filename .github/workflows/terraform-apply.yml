@@ -1,0 +1,52 @@
+name: terraform-apply
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: "The working directory where the terraform files are located"
+        type: string
+        required: true
+        default: "../terraform/"
+      workspace:
+        description: "The terraform workspace to use"
+        type: string
+        required: true
+
+jobs:
+  terraform-apply:
+    runs-on: ubuntu-latest
+    if: 
+      (github.ref == 'refs/heads/main' && (${{inputs.workspace}} == 'prod' || github.ref == 'refs/heads/main' && ${{inputs.workspace}} == 'default')) ||
+      (github.ref == 'refs/heads/lab' && ${{inputs.workspace}} == 'dev') ||
+      (github.ref == 'refs/heads/qs' && ${{inputs.workspace}} == 'qs')
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Download Plan
+        uses: actions/download-artifact@v3
+        with:
+          name: plan-${{ inputs.workspace }}
+          path: ${{inputs.working-directory}}/plan.tfplan
+
+      - name: Terraform Apply
+        if: ${{ inputs.workspace != 'default'}}
+        run: terraform apply "plan.tfplan" -auto-approve -var-file=./env/${{ inputs.workspace }}.tfvars
+        working-directory: ${{inputs.working-directory}}
+      
+      - name: Terraform Apply Default
+        if: ${{ inputs.workspace == 'default'}}
+        run: terraform apply -auto-approve "plan.tfplan"
+        working-directory: ${{inputs.working-directory}}

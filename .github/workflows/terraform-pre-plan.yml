@@ -1,0 +1,43 @@
+name: Terraform pre-plan
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        type: string
+        default: "."
+
+jobs:
+  terraform-pre-plan:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ${{inputs.working-directory}}
+      
+      - name: Terraform Lint
+        run: terraform fmt -check
+        working-directory: ${{inputs.working-directory}}
+
+      - name: Terraform Format
+        run: terraform fmt
+        working-directory: ${{inputs.working-directory}}
+
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: ${{inputs.working-directory}}

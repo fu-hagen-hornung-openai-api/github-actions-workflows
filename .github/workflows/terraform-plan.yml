@@ -1,0 +1,49 @@
+name: Terraform plan
+
+on:
+  workflow_call:
+      inputs:
+        working-directory:
+          type: string
+          default: "."
+        workspace:
+          type: string
+
+jobs: 
+    terraform-plan:
+        if: (github.event_name == 'pull_request' || github.ref == 'refs/heads/main')
+        runs-on: ubuntu-latest
+        steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+
+        - name: Setup Terraform
+          uses: hashicorp/setup-terraform@v2
+
+        - name: Configure AWS Credentials
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: eu-central-1
+
+        - name: Terraform Plan
+          if: ${{ inputs.workspace != 'default' }}
+          run: |
+            terraform init
+            terraform workspace select -or-create ${{inputs.workspace}}
+            terraform plan -var-file=./env/dev.tfvars -out=plan.tfplan
+          working-directory: ${{inputs.working-directory}}
+
+        - name: Terraform Plan Default Workspace
+          if: ${{ inputs.workspace == 'default' }}
+          run: |
+            terraform init
+            terraform plan -out=plan.tfplan
+          working-directory: ${{inputs.working-directory}}
+
+        - name: Upload Plan
+          uses: actions/upload-artifact@v3
+          with:
+            name: plan-${{inputs.workspace}}
+            path: ${{inputs.working-directory}}/plan.tfplan
