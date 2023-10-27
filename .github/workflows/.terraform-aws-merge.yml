@@ -12,18 +12,11 @@ on:
       
 jobs:
 
-  terraform-pre-plan:
-    if: github.event_name == 'pull_request'
-    uses: ./.github/workflows/terraform-pre-plan.yml
-    with:
-      working-directory: ${{ inputs.working-directory }}
-    secrets: inherit
-
   terraform-plan:
     strategy:
       matrix:
         workspace: ${{fromJson(inputs.workspaces)}}
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/lab' || github.ref == 'refs/heads/qs')
     uses: ./.github/workflows/terraform-plan.yml
     with:
       working-directory: ${{ inputs.working-directory }}
@@ -31,10 +24,14 @@ jobs:
     secrets: inherit
 
   terraform-apply:
-    if: github.event_name == 'push'
+    strategy:
+      matrix:
+        workspace: ${{fromJson(inputs.workspaces)}}
+    needs: terraform-plan
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/lab' || github.ref == 'refs/heads/qs')
     uses: ./.github/workflows/terraform-apply.yml
     with:
       working-directory: ${{ inputs.working-directory }}
-      workspace: prod
+      workspace: ${{ matrix.workspace }}
     secrets: inherit
 

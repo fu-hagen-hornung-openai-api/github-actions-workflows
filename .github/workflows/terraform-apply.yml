@@ -16,10 +16,7 @@ on:
 jobs:
   terraform-apply:
     runs-on: ubuntu-latest
-    if: 
-      (github.ref == 'refs/heads/main' && (${{inputs.workspace}} == 'prod' || github.ref == 'refs/heads/main' && ${{inputs.workspace}} == 'default')) ||
-      (github.ref == 'refs/heads/lab' && ${{inputs.workspace}} == 'dev') ||
-      (github.ref == 'refs/heads/qs' && ${{inputs.workspace}} == 'qs')
+    
     steps:
 
       - name: Checkout
@@ -39,14 +36,19 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: plan-${{ inputs.workspace }}
-          path: ${{inputs.working-directory}}/plan.tfplan
+          path: ${{inputs.working-directory}}
 
       - name: Terraform Apply
         if: ${{ inputs.workspace != 'default'}}
-        run: terraform apply "plan.tfplan" -auto-approve -var-file=./env/${{ inputs.workspace }}.tfvars
+        run: |
+          terraform init
+          terraform workspace select -or-create ${{inputs.workspace}}
+          terraform apply -auto-approve -var-file=./env/${{ inputs.workspace }}.tfvars ./plan.tfplan
         working-directory: ${{inputs.working-directory}}
       
       - name: Terraform Apply Default
         if: ${{ inputs.workspace == 'default'}}
-        run: terraform apply -auto-approve "plan.tfplan"
+        run: |
+          terraform init
+          terraform apply -auto-approve ./plan.tfplan
         working-directory: ${{inputs.working-directory}}
