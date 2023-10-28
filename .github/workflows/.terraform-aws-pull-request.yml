@@ -13,7 +13,6 @@ on:
 jobs:
 
   terraform-validate:
-    if: github.event_name == 'pull_request'
     uses: ./.github/workflows/terraform-check.yml
     with:
       working-directory: ${{ inputs.working-directory }}
@@ -24,7 +23,6 @@ jobs:
     strategy:
       matrix:
         workspace: ${{fromJson(inputs.workspaces)}}
-    if: github.event_name == 'pull_request'
     uses: ./.github/workflows/terraform-plan.yml
     with:
       working-directory: ${{ inputs.working-directory }}
