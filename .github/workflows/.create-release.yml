@@ -1,38 +1,23 @@
 name: 'Create a new releasae'
 
-on:
+on: 
   push:
     branches:
-    - main
+      - master
 
 jobs:
-  build:
+  release-on-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Bump version and push tag
-      id: create_tag
-      uses: anothrNick/github-tag-action@1.64.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        WITH_V: true
-        DEFAULT_BUMP: patch
-        RELEASE_BRANCHES: main
-        CUSTOM_TAG: ${{ github.event.head_commit.message }}
-        TAG_CONTEXT: commit
-        DRY_RUN: false
-        VERBOSE: true
-
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ steps.create_tag.outputs.tag }}
-        release_name: Release ${{ steps.create_tag.outputs.tag }}
-        body: ${{ github.event.head_commit.message }}
-        draft: false
-        prerelease: false
+      - name: Checkout code
+        uses: actions/checkout@v2
+  
+      - uses: rymndhng/release-on-push-action@v0.28.0
+        with:
+          bump_version_scheme: minor
+          tag_prefix: v
