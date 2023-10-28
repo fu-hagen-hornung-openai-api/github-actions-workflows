@@ -19,5 +19,5 @@ jobs:
   
       - uses: rymndhng/release-on-push-action@v0.28.0
         with:
-          bump_version_scheme: minor
+          bump_version_scheme: patch
           tag_prefix: v
