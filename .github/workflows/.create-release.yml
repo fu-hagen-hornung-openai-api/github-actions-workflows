@@ -3,7 +3,7 @@ name: 'Create a new releasae'
 on: 
   push:
     branches:
-      - master
+      - main
 
 jobs:
   release-on-push:
