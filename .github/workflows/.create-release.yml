@@ -14,7 +14,7 @@ jobs:
 
     - name: Bump version and push tag
       id: create_tag
-      uses: anothrNick/github-tag-action@1.34.0
+      uses: anothrNick/github-tag-action@1.64.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         WITH_V: true
@@ -24,9 +24,6 @@ jobs:
         TAG_CONTEXT: commit
         DRY_RUN: false
         VERBOSE: true
-
-    - name: Fix permissions
-      run: sudo chown -R $(whoami) .
 
     - name: Create Release
       id: create_release
