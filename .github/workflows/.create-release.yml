@@ -26,7 +26,7 @@ jobs:
         VERBOSE: true
 
     - name: Fix permissions
-      run: sudo chown -R $(whoami) .
+      run: sudo chown -R $(whoami) $(pwd)
 
     - name: Create Release
       id: create_release
