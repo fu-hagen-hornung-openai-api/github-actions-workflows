@@ -17,7 +17,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
   
-      - uses: rymndhng/release-on-push-action@master
+      - uses: rymndhng/release-on-push-action@v0.28.0
         with:
           bump_version_scheme: minor
           tag_prefix: v
