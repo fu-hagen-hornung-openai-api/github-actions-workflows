@@ -25,6 +25,9 @@ jobs:
         DRY_RUN: false
         VERBOSE: true
 
+    - name: Fix permissions
+      run: sudo chown -R $(whoami) .
+
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
