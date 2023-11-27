@@ -26,7 +26,7 @@ jobs:
     - name: Build Docker image
       uses: docker/build-push-action@v5
       with:
-        context: .
+        context: ${{ inputs.working-directory }}
         platforms: linux/arm64
         push: false
         tags: test-build:latest
