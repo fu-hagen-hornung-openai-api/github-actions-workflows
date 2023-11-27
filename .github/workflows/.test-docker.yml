@@ -1,4 +1,4 @@
-name: Docker Build and Push to ECR
+name: Docker-Test
 
 on:
   workflow_call:
