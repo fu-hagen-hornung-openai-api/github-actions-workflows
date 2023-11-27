@@ -2,11 +2,10 @@ name: Docker Build and Push to ECR
 
 on:
   workflow_call:
-    secrets:
-      aws-access-key-id:
+    inputs:
+      working-directory:
         required: true
-      aws-secret-access-key:
-        required: true
+        type: string
 
 jobs:
   build:
@@ -14,9 +13,8 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Dry run on PR
-      run: |
-        cd code
-        docker build --progress=plain --platform=linux/arm64 -t test-build .
+      run: docker build --progress=plain --platform=linux/arm64 -t test-build .
+      working-directory: ${{ inputs.working-directory }}
