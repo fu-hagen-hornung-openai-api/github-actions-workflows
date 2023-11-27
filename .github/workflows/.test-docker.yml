@@ -20,6 +20,13 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Dry run on PR
-      run: docker build --progress=plain --platform=linux/arm64 -t test-build .
-      working-directory: ${{ inputs.working-directory }}
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+  
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        platforms: linux/arm64
+        push: false
+        tags: test-build:latest
