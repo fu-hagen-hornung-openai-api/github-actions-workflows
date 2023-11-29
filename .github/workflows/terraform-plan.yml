@@ -28,6 +28,8 @@ jobs:
 
         - name: Terraform Plan
           if: ${{ inputs.workspace != 'default' }}
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           run: |
             terraform init
             terraform workspace select -or-create ${{inputs.workspace}}
@@ -36,6 +38,8 @@ jobs:
 
         - name: Terraform Plan Default Workspace
           if: ${{ inputs.workspace == 'default' }}
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           run: |
             terraform init
             terraform plan -out=plan.tfplan

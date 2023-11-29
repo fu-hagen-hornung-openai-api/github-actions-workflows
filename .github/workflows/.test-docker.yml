@@ -1,0 +1,27 @@
+name: Docker-Test
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+  
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ${{ inputs.working-directory }}
+        platforms: linux/arm64
+        push: false
+        tags: $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}
