@@ -24,4 +24,4 @@ jobs:
         context: ${{ inputs.working-directory }}
         platforms: linux/arm64
         push: false
-        tags: test-build:latest
+        tags: $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}

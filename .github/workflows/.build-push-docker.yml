@@ -2,6 +2,13 @@ name: Docker Build and Push to ECR
 
 on:
   workflow_call:
+    inputs:
+      lambda_functions:
+        required: true
+        type: json
+      workspace:
+        required: true
+        type: string
     secrets:
       aws-access-key-id:
         required: true
@@ -11,6 +18,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{fromJson(inputs.lambda_functions)}}
 
     steps:
     - name: Checkout code
@@ -23,29 +32,44 @@ jobs:
         aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
         aws-region: eu-central-1
 
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
     - name: Dry run on PR
       if: github.event_name == 'pull_request'
       env:
-        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+        ECR_REPOSITORY: ${{ matrix.ecr-repository }}-${{ inputs.workspace }}
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ github.sha }}
+      uses: docker/build-push-action@v5
+      with:
+        context: ${{ matrix.working-directory }}
+        platforms: linux/arm64
+        push: false
+        tags: $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}
+
+    - name: Create ECR repository if it doesn't exist
+      id: create-ecr
       run: |
-        cd code
-        docker build --progress=plain --platform=linux/arm64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        aws ecr describe-repositories --repository-names ${{ matrix.ecr-repository }}-${{ inputs.workspace }} || aws ecr create-repository --repository-name ${{ matrix.ecr-repository }}-${{ inputs.workspace }}
 
     - name: Build, tag, and push image to Amazon ECR
-      if: github.event_name == 'push'
-      id: build-image
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      id: build-and-push-image
       env:
-        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+        ECR_REPOSITORY: ${{ matrix.ecr-repository }}-${{ inputs.workspace }}
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ github.sha }}
-      run: |
-        cd code
-        docker build --progress=plain --platform=linux/arm64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
+      uses: docker/build-push-action@v5
+      with:
+        context: ${{ matrix.working-directory }}
+        platforms: linux/arm64
+        push: true
+        tags: $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}

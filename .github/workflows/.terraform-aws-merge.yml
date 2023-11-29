@@ -32,4 +32,3 @@ jobs:
       working-directory: ${{ inputs.working-directory }}
       workspace: ${{ matrix.workspace }}
     secrets: inherit
-
