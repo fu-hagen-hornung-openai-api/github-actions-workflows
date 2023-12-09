@@ -8,14 +8,13 @@ on:
           default: "."
         workspace:
           type: string
+      secrets:
         aws-access-key-id:
           description: 'AWS Access Key ID'
           required: true
-          type: string
         aws-secret-access-key:
           description: 'AWS Secret Access Key'
           required: true
-          type: string
 
 jobs: 
     terraform-plan:

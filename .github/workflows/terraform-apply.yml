@@ -12,14 +12,13 @@ on:
         description: "The terraform workspace to use"
         type: string
         required: true
+    secrets:
       aws-access-key-id:
         description: 'AWS Access Key ID'
         required: true
-        type: string
       aws-secret-access-key:
         description: 'AWS Secret Access Key'
         required: true
-        type: string
 
 jobs:
   terraform-apply:
