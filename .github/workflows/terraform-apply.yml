@@ -16,6 +16,9 @@ on:
 jobs:
   terraform-apply:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     
     steps:
 
@@ -45,8 +48,6 @@ jobs:
           path: ${{inputs.working-directory}}
 
       - name: Terraform Apply
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: ${{ inputs.workspace != 'default'}}
         run: |
           terraform init
@@ -55,8 +56,6 @@ jobs:
         working-directory: ${{inputs.working-directory}}
       
       - name: Terraform Apply Default
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: ${{ inputs.workspace == 'default'}}
         run: |
           terraform init
