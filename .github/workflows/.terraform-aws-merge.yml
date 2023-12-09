@@ -27,7 +27,9 @@ jobs:
     with:
       working-directory: ${{ inputs.working-directory }}
       workspace: ${{ matrix.workspace }}
-    secrets: inherit
+    secrets: 
+      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
   terraform-apply:
     strategy:
@@ -38,4 +40,6 @@ jobs:
     with:
       working-directory: ${{ inputs.working-directory }}
       workspace: ${{ matrix.workspace }}
-    secrets: inherit
+    secrets: 
+      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

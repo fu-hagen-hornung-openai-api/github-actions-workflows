@@ -6,6 +6,13 @@ on:
       working-directory:
         type: string
         default: "."
+    secrets:
+      aws-access-key-id:
+        description: 'AWS Access Key ID'
+        required: true
+      aws-secret-access-key:
+        description: 'AWS Secret Access Key'
+        required: true
 
 jobs:
   terraform-pre-plan:
