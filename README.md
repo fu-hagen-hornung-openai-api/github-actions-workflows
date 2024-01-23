@@ -1,4 +1,3 @@
-```markdown:terraform-github-actions/README.md
 # Terraform GitHub Actions
 
 This repository contains a collection of GitHub Actions workflows designed to automate various Terraform operations. These workflows can be used to manage infrastructure as code (IaC) within GitHub repositories.
